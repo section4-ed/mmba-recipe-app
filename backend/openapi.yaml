@@ -1,0 +1,95 @@
+openapi: 3.0.0
+info:
+  title: Recipe Processing API
+  description: API for processing and analyzing recipe documents
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+
+paths:
+  /process-recipe:
+    post:
+      summary: Process a recipe document
+      description: Upload and process a recipe document to extract structured information
+      operationId: processRecipe
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The recipe document file to process
+      responses:
+        '200':
+          description: Successful recipe processing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecipeDoc'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+
+components:
+  schemas:
+    Ingredient:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the ingredient
+        amount:
+          type: number
+          format: float
+          description: Quantity of the ingredient needed
+        unit:
+          type: string
+          description: Unit of measurement (e.g., cups, grams, pieces)
+      required:
+        - name
+        - amount
+        - unit
+
+    Recipe:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Name of the recipe
+        ingredients:
+          type: array
+          items:
+            $ref: '#/components/schemas/Ingredient'
+          description: List of ingredients needed for the recipe
+        instructions:
+          type: array
+          items:
+            type: string
+          description: Step-by-step instructions to prepare the recipe
+      required:
+        - title
+        - ingredients
+        - instructions
+
+    RecipeDoc:
+      type: object
+      properties:
+        recipes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Recipe'
+          description: A list of recipes
+      required:
+        - recipes 
